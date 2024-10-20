@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #19114b;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 80%;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            color: #000000;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #qrcode, #downloadBtn {
+            margin-top: 20px;
+        }
+        .qr-container {
+            text-align: center;
+        }
+        .qr-text {
+            margin-top: 20px; /* Add more space between QR code and name */
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #19114b;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>QR Code Generator</h1>
+    <input type="text" id="name" placeholder="Enter your name">
+    <input type="text" id="ID" placeholder="Enter your ID">
+    <input type="text" id="department" placeholder="Enter your department">
+    <input type="text" id="program" placeholder="Enter your program">
+    <input type="text" id="semester" placeholder="Enter your semester">
+    <input type="text" id="email" placeholder="Enter your email">
+    <button onclick="generateQRCode()">Generate QR Code</button>
+    <div id="qrcode" class="qr-container"></div>
+    <canvas id="canvas"></canvas>
+    <a id="downloadBtn" style="display: none;">Download QR Code</a>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        function generateQRCode() {
+            const name = document.getElementById('name').value;
+            const ID = document.getElementById('ID').value;
+            const department = document.getElementById('department').value;
+            const program = document.getElementById('program').value;
+            const semester = document.getElementById('semester').value;
+            const email = document.getElementById('email').value;
+            const qrText = `Name: ${name}, ID: ${ID}, Department: ${department}, Program: ${program}, Semester: ${semester}, Email: ${email}`;
+            
+            // Clear previous QR code
+            document.getElementById('qrcode').innerHTML = "";
+            document.getElementById('downloadBtn').style.display = "none";
+
+            // Generate new QR code with colored edges
+            const qr = new QRCode(document.createElement('div'), {
+                text: qrText,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff"
+            });
+
+            // Convert QR code to canvas
+            setTimeout(() => {
+                const qrCodeImg = qr._el.querySelector('img');
+                if (qrCodeImg) {
+                    const canvas = document.getElementById('canvas');
+                    canvas.width = qrCodeImg.width + 20; // Add border space
+                    canvas.height = qrCodeImg.height + 50; // Add space for name
+                    const context = canvas.getContext('2d');
+                    
+                    // Draw background and border
+                    context.fillStyle = "#19114b";
+                    context.fillRect(0, 0, canvas.width, canvas.height);
+
+                    // Draw QR code
+                    context.drawImage(qrCodeImg, 10, 10);
+
+                    // Draw name text on canvas with background color #19114b and text color white
+                    context.fillStyle = "#19114b";
+                    context.fillRect(0, qrCodeImg.height + 20, canvas.width, 30);
+                    context.font = "18px Arial";
+                    context.fillStyle = "#ffffff";
+                    context.textAlign = "center";
+                    context.fillText(name, canvas.width / 2, qrCodeImg.height + 40);
+
+                    // Add name text below the QR code
+                    const qrContainer = document.getElementById('qrcode');
+                    qrContainer.appendChild(qrCodeImg);
+                    const qrTextElement = document.createElement('div');
+                    qrTextElement.textContent = name;
+                    qrTextElement.className = 'qr-text';
+                    qrContainer.appendChild(qrTextElement);
+
+                    // Create download link
+                    const downloadBtn = document.getElementById('downloadBtn');
+                    downloadBtn.href = canvas.toDataURL('image/png');
+                    downloadBtn.download = `${name || 'qrcode'}.png`;
+                    downloadBtn.textContent = 'Download QR Code';
+                    downloadBtn.style.display = 'block';
+                }
+            }, 500);
+        }
+    </script>
+</body>
+</html>
